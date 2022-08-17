@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<concrete5-cif version="1.0">
+    <singlepages>
+        <page name="Export CSV"
+              path="/dashboard/users/export"
+              filename="/dashboard/users/export.php"
+              pagetype=""
+              description=""
+              package="md_csv_user_import_export"/>
+        <page name="Import CSV"
+              path="/dashboard/users/import"
+              filename="/dashboard/users/import.php"
+              pagetype=""
+              description=""
+              package="md_csv_user_import_export"/>
+    </singlepages>
+</concrete5-cif>
