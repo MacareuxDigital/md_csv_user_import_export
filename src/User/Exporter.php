@@ -73,7 +73,7 @@ class Exporter
     {
         $this->writer = $writer;
         $this->columns = $columns;
-        $this->format = $config->get('concrete.export.csv.datetime_format', 'ATOM');
+        $this->format = $this->getFormatByName($config->get('concrete.export.csv.datetime_format', 'ATOM'));
         $this->dateHelper = $dateHelper;
         $this->userInfoRepository = $userInfoRepository;
         $this->groupRepository = $groupRepository;
@@ -227,5 +227,16 @@ class Exporter
             yield iterator_to_array($this->getValues($userInfo));
             $this->tick();
         }
+    }
+
+    protected function getFormatByName(string $formatName = 'ATOM')
+    {
+        $datetime_format_constant = sprintf('DATE_%s', $formatName);
+
+        if (defined($datetime_format_constant)) {
+            return constant($datetime_format_constant);
+        }
+
+        return DATE_ATOM;
     }
 }
