@@ -231,32 +231,12 @@ class Exporter
 
     protected function getFormatByName(string $formatName = 'ATOM')
     {
-        switch ($formatName) {
-            case 'COOKIE':
-                return DATE_COOKIE;
-            case 'RFC822':
-                return DATE_RFC822;
-            case 'RFC850':
-                return DATE_RFC850;
-            case 'RFC1036':
-                return DATE_RFC1036;
-            case 'RFC1123':
-                return DATE_RFC1123;
-            case 'RFC7231':
-                return DATE_RFC7231;
-            case 'RFC2822':
-                return DATE_RFC2822;
-            case 'RFC3339':
-                return DATE_RFC3339;
-            case 'RFC3339_EXTENDED':
-                return DATE_RFC3339_EXTENDED;
-            case 'RSS':
-                return DATE_RSS;
-            case 'W3C':
-                return DATE_W3C;
-            case 'ATOM':
-            default:
-                return DATE_ATOM;
+        $datetime_format_constant = sprintf('DATE_%s', $formatName);
+
+        if (defined($datetime_format_constant)) {
+            return constant($datetime_format_constant);
         }
+
+        return DATE_ATOM;
     }
 }
