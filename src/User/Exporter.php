@@ -73,7 +73,7 @@ class Exporter
     {
         $this->writer = $writer;
         $this->columns = $columns;
-        $this->format = $config->get('concrete.export.csv.datetime_format', 'ATOM');
+        $this->format = $this->getFormatByName($config->get('concrete.export.csv.datetime_format', 'ATOM'));
         $this->dateHelper = $dateHelper;
         $this->userInfoRepository = $userInfoRepository;
         $this->groupRepository = $groupRepository;
@@ -226,6 +226,37 @@ class Exporter
         foreach ($this->userInfoRepository->all() as $userInfo) {
             yield iterator_to_array($this->getValues($userInfo));
             $this->tick();
+        }
+    }
+
+    protected function getFormatByName(string $formatName = 'ATOM')
+    {
+        switch ($formatName) {
+            case 'COOKIE':
+                return DATE_COOKIE;
+            case 'RFC822':
+                return DATE_RFC822;
+            case 'RFC850':
+                return DATE_RFC850;
+            case 'RFC1036':
+                return DATE_RFC1036;
+            case 'RFC1123':
+                return DATE_RFC1123;
+            case 'RFC7231':
+                return DATE_RFC7231;
+            case 'RFC2822':
+                return DATE_RFC2822;
+            case 'RFC3339':
+                return DATE_RFC3339;
+            case 'RFC3339_EXTENDED':
+                return DATE_RFC3339_EXTENDED;
+            case 'RSS':
+                return DATE_RSS;
+            case 'W3C':
+                return DATE_W3C;
+            case 'ATOM':
+            default:
+                return DATE_ATOM;
         }
     }
 }
