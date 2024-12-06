@@ -79,8 +79,8 @@ class Exporter
         $this->groupRepository = $groupRepository;
         $this->entityManager = $entityManager;
         $this->attributeCategory = $userCategory;
-        if ($config->get('concrete.export.csv.ticks_until_unload') !== null) {
-            $this->setUnloadDoctrineEveryTick($config->get('concrete.export.csv.ticks_until_unload'));
+        if ($config->get('concrete.export.csv.batch_size') !== null) {
+            $this->setUnloadDoctrineEveryTick($config->get('concrete.export.csv.batch_size'));
         }
     }
 
