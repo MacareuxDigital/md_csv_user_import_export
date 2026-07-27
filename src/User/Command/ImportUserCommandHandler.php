@@ -7,6 +7,7 @@ use Concrete\Core\Attribute\SimpleTextExportableAttributeInterface;
 use Concrete\Core\Error\ErrorList\ErrorList;
 use Concrete\Core\Logging\LoggerFactory;
 use Concrete\Core\Support\Facade\Application;
+use Concrete\Core\User\Group\Group;
 use Concrete\Core\User\RegistrationService;
 use Concrete\Core\User\UserInfoRepository;
 use Concrete\Core\Utility\Service\Identifier;
@@ -141,6 +142,23 @@ class ImportUserCommandHandler
                     } else {
                         $user->exitGroup($group);
                     }
+                }
+            }
+
+            foreach (['assign_group' => true, 'unassign_group' => false] as $handle => $assign) {
+                $groupName = $this->getValue($row, $handle);
+                if ($groupName === null) {
+                    continue;
+                }
+                $group = Group::getByName($groupName);
+                if ($group) {
+                    if ($assign) {
+                        $user->enterGroup($group);
+                    } else {
+                        $user->exitGroup($group);
+                    }
+                } else {
+                    $logger->info(t('Group not found: %s (row %s)', $groupName, $line));
                 }
             }
 
