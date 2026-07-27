@@ -46,6 +46,8 @@ trait CsvTrait
             'active' => t('Active'),
             'validated' => t('Validated'),
             'password' => t('Password'),
+            'assign_group' => t('Assign to Group'),
+            'unassign_group' => t('Unassign from Group'),
         ];
 
         $groupHeaders = $this->getGroupHeaders();
