@@ -1,4 +1,7 @@
 # Release Notes
+## [Unreleased]
+- [Added] `password_reset` CSV column to require a password change on the next Concrete login
+
 ## [0.9.2] - Dec 6, 2024
 - [Added] Ability to configure export batch size in `concrete.export.csv.batch_size` config
 

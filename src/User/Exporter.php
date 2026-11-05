@@ -169,6 +169,9 @@ class Exporter
             case 'validated':
                 $value = $userInfo->isValidated();
                 break;
+            case 'password_reset':
+                $value = $userInfo->getEntityObject()->isUserPasswordReset();
+                break;
         }
 
         if (substr($handle, 0, 2) === 'g:') {

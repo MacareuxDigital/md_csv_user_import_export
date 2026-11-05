@@ -46,6 +46,7 @@ class ImportUserCommandHandler
         $active = $this->getValue($row, 'active');
         $validated = $this->getValue($row, 'validated');
         $password = $this->getValue($row, 'password');
+        $passwordReset = $this->getValue($row, 'password_reset');
 
         $line = $command->getLine();
 
@@ -129,6 +130,23 @@ class ImportUserCommandHandler
                 }
                 if (!$active && $userInfo->isActive() === true) {
                     $userInfo->deactivate();
+                }
+            }
+            // Blank cells stay unchanged, matching validated. markAsPasswordReset()
+            // writes Users.uIsPasswordReset with its own query, so the managed entity
+            // is updated too; a later flush would otherwise restore the loaded value.
+            // Core clears the flag only from changePassword(), which also replaces
+            // the password, so 0 is stored on the user entity.
+            if ($passwordReset !== null) {
+                $passwordReset = (int) $passwordReset;
+                $isReset = (bool) $entity->isUserPasswordReset();
+                if ($passwordReset && !$isReset) {
+                    $entity->setUserIsPasswordReset(true);
+                    $userInfo->markAsPasswordReset();
+                    $isEntityUpdated = true;
+                } elseif (!$passwordReset && $isReset) {
+                    $entity->setUserIsPasswordReset(false);
+                    $isEntityUpdated = true;
                 }
             }
 
