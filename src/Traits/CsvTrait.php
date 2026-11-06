@@ -28,6 +28,7 @@ trait CsvTrait
             'language' => t('Language'),
             'active' => t('Active'),
             'validated' => t('Validated'),
+            'password_reset' => t('Password Reset'),
         ];
 
         $groupHeaders = $this->getGroupHeaders();
@@ -46,6 +47,7 @@ trait CsvTrait
             'active' => t('Active'),
             'validated' => t('Validated'),
             'password' => t('Password'),
+            'password_reset' => t('Password Reset'),
         ];
 
         $groupHeaders = $this->getGroupHeaders();
