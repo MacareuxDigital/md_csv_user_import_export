@@ -46,6 +46,7 @@ class ImportUserCommandHandler
         $active = $this->getValue($row, 'active');
         $validated = $this->getValue($row, 'validated');
         $password = $this->getValue($row, 'password');
+        $passwordReset = $this->getValue($row, 'password_reset');
 
         $line = $command->getLine();
 
@@ -58,6 +59,7 @@ class ImportUserCommandHandler
 
         /** @var ErrorList $error */
         $error = $app->make(ErrorList::class);
+        $userReady = false;
         if (isset($userInfo)) {
             if ($email && $email !== $userInfo->getUserEmail()) {
                 $emailValidator->isValid($email, $error);
@@ -72,6 +74,9 @@ class ImportUserCommandHandler
             if ($password) {
                 $passwordValidator->isValid($password, $error);
                 $data['uPassword'] = $password;
+                $data['uPasswordConfirm'] = $password;
+                // UserInfo::update() ignores uPassword unless the caller opts in.
+                $data['_allowPasswordUpdate'] = true;
             }
             if ($language) {
                 $data['uDefaultLanguage'] = $language;
@@ -79,7 +84,7 @@ class ImportUserCommandHandler
             if ($error->has()) {
                 $logger->info('Failed to update:' . $error->toText() . '(row ' . $line . ')');
             } else {
-                $userInfo->update($data);
+                $userReady = $userInfo->update($data) === true;
             }
         } else {
             if ($username) {
@@ -106,12 +111,13 @@ class ImportUserCommandHandler
                 /** @var RegistrationService $registrationService */
                 $registrationService = $app->make('user/registration');
                 $userInfo = $registrationService->create($data);
+                $userReady = (bool) $userInfo;
             } else {
                 $logger->info('Failed to add:' . $error->toText() . '(row ' . $line . ')');
             }
         }
 
-        if (isset($userInfo)) {
+        if (isset($userInfo) && $userInfo) {
             /** @var EntityManagerInterface $entityManager */
             $entityManager = $app->make(EntityManagerInterface::class);
             $entity = $userInfo->getEntityObject();
@@ -130,6 +136,9 @@ class ImportUserCommandHandler
                 if (!$active && $userInfo->isActive() === true) {
                     $userInfo->deactivate();
                 }
+            }
+            if ($userReady && $passwordReset !== null && $this->applyPasswordReset($userInfo, $entity, $passwordReset)) {
+                $isEntityUpdated = true;
             }
 
             foreach ($this->getGroups() as $groupHandle => $group) {
@@ -217,5 +226,30 @@ class ImportUserCommandHandler
         }
 
         return $value;
+    }
+
+    /**
+     * Empty CSV values never reach this method. 1 requires a change at next login; 0 clears that requirement.
+     *
+     * @param \Concrete\Core\User\UserInfo $userInfo
+     * @param \Concrete\Core\Entity\User\User $entity
+     * @param string|int $passwordReset
+     *
+     * @return bool True when the managed entity must be flushed
+     */
+    protected function applyPasswordReset($userInfo, $entity, $passwordReset)
+    {
+        $requireReset = (int) $passwordReset !== 0;
+        if ($requireReset === (bool) $entity->isUserPasswordReset()) {
+            return false;
+        }
+
+        if ($requireReset) {
+            $userInfo->markAsPasswordReset();
+        }
+        // markAsPasswordReset() writes SQL directly. Keep the managed entity aligned so a later flush cannot revert it.
+        $entity->setUserIsPasswordReset($requireReset);
+
+        return true;
     }
 }
